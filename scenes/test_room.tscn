@@ -1,0 +1,40 @@
+[gd_scene format=3 uid="uid://d344pl5iqhpdu"]
+
+[ext_resource type="Script" uid="uid://cin841h18domf" path="res://scenes/test_room.gd" id="1_tr"]
+[ext_resource type="PackedScene" uid="uid://bnjub852sncoq" path="res://scenes/player/player.tscn" id="2_player"]
+
+[node name="TestRoom" type="Node2D" unique_id=1957784662]
+script = ExtResource("1_tr")
+
+[node name="Player" parent="." unique_id=1340389007 instance=ExtResource("2_player")]
+position = Vector2(400, 300)
+
+[node name="HUD_placeholder" type="CanvasLayer" parent="." unique_id=79821751]
+
+[node name="HPLabel" type="Label" parent="HUD_placeholder" unique_id=309176693]
+offset_left = 20.0
+offset_top = 20.0
+offset_right = 320.0
+offset_bottom = 50.0
+text = "HP: 100 / 100"
+
+[node name="AmmoLabel" type="Label" parent="HUD_placeholder" unique_id=426387940]
+offset_left = 1050.0
+offset_top = 20.0
+offset_right = 1260.0
+offset_bottom = 50.0
+text = "30 / 30"
+
+[node name="StateLabel" type="Label" parent="HUD_placeholder" unique_id=1001831605]
+offset_left = 580.0
+offset_top = 20.0
+offset_right = 760.0
+offset_bottom = 50.0
+text = "READY"
+
+[node name="WeaponLabel" type="Label" parent="HUD_placeholder" unique_id=1322088180]
+offset_left = 560.0
+offset_top = 680.0
+offset_right = 760.0
+offset_bottom = 710.0
+text = "AK-IRON"

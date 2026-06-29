@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://bvv0yefofke3"]
+
+[ext_resource type="Script" uid="uid://gbmfat7qw6vg" path="res://resources/weapon_data.gd" id="1_wdata"]
+
+[resource]
+script = ExtResource("1_wdata")
+weapon_name = "BREACH-12"
+weapon_type = "shotgun"
+damage = 22.0
+fire_rate = 1.2
+mag_size = 2
+reload_time = 1.0
+cooldown_time = 0.3
+accuracy = 0.25
+bullet_speed = 480.0
+bullet_count = 8
+is_auto = false
+skill_name = "Knockback Nova"
+skill_description = "Next shot sends all nearby enemies flying."
+skill_cooldown = 15.0
+synergy_path = "control"

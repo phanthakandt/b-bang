@@ -1,0 +1,61 @@
+[gd_scene format=3 uid="uid://bnjub852sncoq"]
+
+[ext_resource type="Script" uid="uid://c1rmvyv1qavsv" path="res://scenes/player/player.gd" id="1_plr"]
+[ext_resource type="Script" uid="uid://dse8qojpe88or" path="res://scenes/weapons/weapon_holder.gd" id="2_wh"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_body"]
+size = Vector2(24, 28)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurt"]
+size = Vector2(20, 24)
+
+[node name="Player" type="CharacterBody2D" unique_id=684415162]
+script = ExtResource("1_plr")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1325130383]
+shape = SubResource("RectangleShape2D_body")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=2050353950]
+offset_left = -12.0
+offset_top = -14.0
+offset_right = 12.0
+offset_bottom = 14.0
+color = Color(0.498, 0.467, 0.867, 1)
+
+[node name="GunPivot" type="Marker2D" parent="." unique_id=693807896]
+script = ExtResource("2_wh")
+
+[node name="MuzzlePoint" type="Marker2D" parent="GunPivot" unique_id=1673674959]
+position = Vector2(20, 0)
+
+[node name="FacingLine" type="Line2D" parent="." unique_id=1216178544]
+points = PackedVector2Array(0, 0, 30, 0)
+width = 2.0
+
+[node name="HurtBox" type="Area2D" parent="." unique_id=2024959142]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox" unique_id=1891108289]
+shape = SubResource("RectangleShape2D_hurt")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1080630467]
+position = Vector2(0, -20)
+position_smoothing_enabled = true
+position_smoothing_speed = 8.0
+
+[node name="ReloadBar" type="Node2D" parent="." unique_id=2087444870]
+visible = false
+position = Vector2(0, -28)
+
+[node name="BG" type="ColorRect" parent="ReloadBar" unique_id=740180246]
+offset_left = -16.0
+offset_top = -3.0
+offset_right = 16.0
+offset_bottom = 3.0
+color = Color(0.08, 0.08, 0.08, 0.85)
+
+[node name="Fill" type="ColorRect" parent="ReloadBar" unique_id=1682515539]
+offset_left = -16.0
+offset_top = -3.0
+offset_right = -16.0
+offset_bottom = 3.0
+color = Color(0.95, 0.85, 0.15, 1)

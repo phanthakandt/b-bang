@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="WeaponData" format=3 uid="uid://cf7oore8egjtw"]
+
+[ext_resource type="Script" uid="uid://gbmfat7qw6vg" path="res://resources/weapon_data.gd" id="1_wdata"]
+
+[resource]
+script = ExtResource("1_wdata")
+weapon_name = "ECHO-SMG"
+fire_rate = 14.0
+mag_size = 25
+reload_time = 1.5
+cooldown_time = 0.2
+accuracy = 0.5
+bullet_speed = 600.0
+skill_name = "Frenzy"
+skill_description = "Fire rate doubles for 5 seconds. No reload."
+skill_cooldown = 18.0
