@@ -1,0 +1,7 @@
+[gd_scene load_steps=3 format=3 uid="uid://bbang_gunner_v1"]
+
+[ext_resource type="PackedScene" uid="uid://bbang_enemy_base_v1" path="res://scenes/enemies/enemy_base.tscn" id="1_base"]
+[ext_resource type="Script" path="res://scenes/enemies/gunner.gd" id="2_script"]
+
+[node name="Gunner" instance=ExtResource("1_base")]
+script = ExtResource("2_script")

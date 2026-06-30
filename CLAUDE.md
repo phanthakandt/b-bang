@@ -168,8 +168,21 @@ effect_type, effect_params: Dictionary
 | `get_state_string()` | `String` | HUD state label |
 
 ### Other
-- **Walls** built in `test_room.gd._build_room()` at runtime — hand-writing 4× StaticBody2D in .tscn is too verbose
 - **Difficulty multiplier**: `1.0 + current_run * 0.15`, range 1.0 (run 0) → 2.35 (run 9)
+
+### Enemy system
+- **EnemyBase state machine**: IDLE/PATROL → CHASE → ATTACK, with STUNNED/DEAD as interrupts. `_physics_process` dispatches via `match state` then calls `move_and_slide()` once centrally — state functions only set `velocity`, never call `move_and_slide()` themselves (Gunner overrides `_state_chase` and relies on this)
+- **Collision layers**: enemy body (CharacterBody2D) sits on `collision_layer = 4`, NOT the default layer 1 that bullets monitor. Only the HurtBox `Area2D` (layer 1) takes bullet hits via `area_entered`. Without this split, a bullet overlapping both the body and the HurtBox at once would call `take_damage()` twice
+- **Per-instance shape duplication**: `body_size`/`detection_radius` are `@export` so Runner/Gunner can override them, but the underlying `RectangleShape2D`/`CircleShape2D` sub-resources are shared across all instances of `enemy_base.tscn` unless duplicated — `_ready()` calls `.duplicate()` before resizing
+- **`player_ref` typed `Player`** (not `Node2D`) — `Player` has a `class_name`, so static calls like `player_ref.take_damage()` work without the duck-typing workaround `weapon_holder` needs
+- **Gunner** overrides `_state_chase` to hold `preferred_distance` instead of closing to melee range; **Runner** just charges and melees
+
+### Room system
+- **RoomBase** (`scenes/rooms/room_base.gd`): walls are hand-authored `StaticBody2D` segments in `room_base.tscn` (split per side to leave a 96px door gap), not built at runtime — the old `test_room.gd._build_room()` runtime approach was replaced
+- **NavigationRegion2D**: `room_base.tscn` ships a pre-baked `NavigationPolygon` (vertices+polygons for the floor quad) instead of baking at runtime, since there's no editor pass available to trigger a bake
+- **Door gap sizing**: `door.tscn` ships a generic 32×64 placeholder shape; `Door.configure(gap_size)` resizes/duplicates it at runtime to fit whichever wall opening `room_base.gd` cut (N/S doors get a 96×32 gap, E/W get 32×96)
+- **RoomLoader autoload** (`systems/room_loader.gd`) tracks `current_room` + `rooms_completed`; boss room loads after 4 procedurally-loaded rooms (so 5 combat rooms total counting the hand-placed one in `test_room.tscn`, matching `GameManager.STAGES_PER_RUN`). `default_enemy_scenes`/`default_wave_count`/`default_enemies_per_wave` must be set by whoever owns the run (currently `test_room.gd`) since procedurally instanced `room_base.tscn` copies don't carry the enemy_scenes override the hand-placed instance has
+- **Door → next room**: `Door._on_transition_trigger_body_entered` calls `RoomLoader.load_next_room()` directly rather than re-emitting `EventBus.room_cleared` — reusing that signal would also fire when waves finish (since `RoomBase.clear_room()` already emits it), double-triggering room loads
 
 ## Weapon instances (`resources/weapons/`)
 | File | Type | Mag | fire_rate | bullet_count | Notes |
@@ -186,4 +199,6 @@ effect_type, effect_params: Dictionary
 | 3 | Done | WeaponHolder state machine, Bullet scene, 3 weapon .tres, test_room |
 | Hotfix | Done | Bullet group `"bullet"` — shotgun pellet mutual destruction bug |
 | Addon | Done | Reload progress bar above player head (world space, 2-phase color) |
-| 4–N | Pending | — |
+| 4 | Done | EnemyBase state machine (IDLE/PATROL/CHASE/ATTACK/STUNNED/DEAD), Runner + Gunner subclasses, enemy_bullet.gd |
+| 5 | Done | RoomBase (waves, doors, NavigationRegion2D floor), Door, RoomLoader autoload, boss_room placeholder; test_room rebuilt on RoomBase |
+| 6–N | Pending | — |
