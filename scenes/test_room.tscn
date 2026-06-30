@@ -1,56 +1,53 @@
 [gd_scene format=3 uid="uid://d344pl5iqhpdu"]
 
-[ext_resource type="Script" path="res://scenes/test_room.gd" id="1_tr"]
+[ext_resource type="Script" uid="uid://cin841h18domf" path="res://scenes/test_room.gd" id="1_tr"]
 [ext_resource type="PackedScene" uid="uid://bnjub852sncoq" path="res://scenes/player/player.tscn" id="2_player"]
-[ext_resource type="PackedScene" uid="uid://bbang_room_base_v1" path="res://scenes/rooms/room_base.tscn" id="3_room"]
-[ext_resource type="PackedScene" uid="uid://bbang_runner_v1" path="res://scenes/enemies/runner.tscn" id="4_runner"]
-[ext_resource type="PackedScene" uid="uid://bbang_gunner_v1" path="res://scenes/enemies/gunner.tscn" id="5_gunner"]
+[ext_resource type="PackedScene" uid="uid://f4r2dg3v5420" path="res://scenes/rooms/room_base.tscn" id="3_room"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/runner.tscn" id="4_runner"]
+[ext_resource type="PackedScene" path="res://scenes/enemies/gunner.tscn" id="5_gunner"]
 
-[node name="TestRoom" type="Node2D"]
+[node name="TestRoom" type="Node2D" unique_id=1453501567]
 script = ExtResource("1_tr")
 
-[node name="RoomBase" parent="." instance=ExtResource("3_room")]
+[node name="RoomBase" parent="." unique_id=905723304 instance=ExtResource("3_room")]
 enemy_scenes = Array[PackedScene]([ExtResource("4_runner"), ExtResource("5_gunner")])
-wave_count = 2
-enemies_per_wave = 3
 
-[node name="Player" parent="." instance=ExtResource("2_player")]
+[node name="Player" parent="." unique_id=1418749743 instance=ExtResource("2_player")]
 position = Vector2(416, 304)
 
-[node name="HUD_placeholder" type="CanvasLayer" parent="."]
+[node name="HUD_placeholder" type="CanvasLayer" parent="." unique_id=2025100836]
 
-[node name="HPLabel" type="Label" parent="HUD_placeholder"]
+[node name="HPLabel" type="Label" parent="HUD_placeholder" unique_id=1561351020]
 offset_left = 20.0
 offset_top = 20.0
 offset_right = 320.0
 offset_bottom = 50.0
 text = "HP: 100 / 100"
 
-[node name="AmmoLabel" type="Label" parent="HUD_placeholder"]
+[node name="AmmoLabel" type="Label" parent="HUD_placeholder" unique_id=1429535405]
 offset_left = 1050.0
 offset_top = 20.0
 offset_right = 1260.0
 offset_bottom = 50.0
 text = "30 / 30"
 
-[node name="StateLabel" type="Label" parent="HUD_placeholder"]
+[node name="StateLabel" type="Label" parent="HUD_placeholder" unique_id=855684158]
 offset_left = 580.0
 offset_top = 20.0
 offset_right = 760.0
 offset_bottom = 50.0
 text = "READY"
 
-[node name="WeaponLabel" type="Label" parent="HUD_placeholder"]
+[node name="WeaponLabel" type="Label" parent="HUD_placeholder" unique_id=1637430904]
 offset_left = 560.0
 offset_top = 680.0
 offset_right = 760.0
 offset_bottom = 710.0
 text = "AK-IRON"
 
-[node name="RoomStateLabel" type="Label" parent="HUD_placeholder"]
+[node name="RoomStateLabel" type="Label" parent="HUD_placeholder" unique_id=1527216955]
 offset_left = 440.0
 offset_top = 50.0
 offset_right = 840.0
 offset_bottom = 80.0
 horizontal_alignment = 1
-text = ""

@@ -35,7 +35,7 @@ func lock() -> void:
 
 func unlock() -> void:
 	is_locked = false
-	block_collision.disabled = true
+	block_collision.set_deferred("disabled", true)
 	door_visual.color = Color(0.16, 0.54, 0.29)
 
 func _on_transition_trigger_body_entered(body: Node) -> void:

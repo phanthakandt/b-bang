@@ -29,14 +29,17 @@ func _state_chase(_delta: float) -> void:
 		nav_agent.target_position = player_ref.global_position
 		var next_pos: Vector2 = nav_agent.get_next_path_position()
 		velocity = (next_pos - global_position).normalized() * move_speed
-	elif dist < preferred_distance:
+	# get_slide_collision_count() reflects last physics frame's move_and_slide() — if
+	# retreating is blocked by a wall, dist never grows past preferred_distance, so
+	# the un-gated version below would push into the wall forever. Stand and shoot instead.
+	elif dist < preferred_distance and get_slide_collision_count() == 0:
 		velocity = (global_position - player_ref.global_position).normalized() * move_speed
 	else:
 		velocity = Vector2.ZERO
 		state = EnemyState.ATTACK
 
 	if velocity != Vector2.ZERO:
-		body_rect.rotation = (player_ref.global_position - global_position).angle()
+		_face((player_ref.global_position - global_position).angle())
 
 	if dist > detection_radius:
 		state = EnemyState.PATROL

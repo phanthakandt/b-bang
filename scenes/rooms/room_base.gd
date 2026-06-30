@@ -5,6 +5,9 @@ const WALL_T: float = 32.0
 const NS_GAP: Vector2 = Vector2(96.0, WALL_T)
 const EW_GAP: Vector2 = Vector2(WALL_T, 96.0)
 const ROOM_CENTER: Vector2 = Vector2(416.0, 304.0)
+# Matches the floor's NavigationPolygon rect in room_base.tscn (32,32)-(800,576) —
+# passed to spawned enemies so their PATROL wander target stays inside the room.
+const FLOOR_BOUNDS: Rect2 = Rect2(Vector2(32.0, 32.0), Vector2(768.0, 544.0))
 
 @export var room_type: String = "combat"
 @export var enemy_scenes: Array[PackedScene] = []
@@ -52,6 +55,7 @@ func spawn_wave() -> void:
 			var enemy: EnemyBase = scene.instantiate()
 			enemies_node.add_child(enemy)
 			enemy.global_position = points[i].global_position
+			enemy.patrol_bounds = FLOOR_BOUNDS
 			active_enemies += 1
 
 	room_label.text = "Wave %d / %d" % [current_wave, wave_count]

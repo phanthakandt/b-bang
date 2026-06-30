@@ -18,7 +18,7 @@ func _ready() -> void:
 	EventBus.player_died.connect(_on_player_died)
 
 	_wh = $Player/GunPivot
-	var weapon: WeaponData = load("res://resources/weapons/echo_smg.tres")
+	var weapon: WeaponData = load("res://resources/weapons/breach_12.tres")
 	_wh.load_weapon(weapon)
 	weapon_label.text = weapon.weapon_name
 

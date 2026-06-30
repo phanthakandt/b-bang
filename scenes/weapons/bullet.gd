@@ -6,6 +6,7 @@ extends Area2D
 
 func _ready() -> void:
 	add_to_group("bullet")
+	add_to_group("player_bullet")
 	body_entered.connect(_on_body_entered)
 	area_entered.connect(_on_area_entered)
 	get_tree().create_timer(lifetime).timeout.connect(queue_free)
@@ -22,7 +23,7 @@ func _on_body_entered(body: Node) -> void:
 	queue_free()
 
 func _on_area_entered(area: Node) -> void:
-	if area.is_in_group("player") or area.is_in_group("bullet"):
+	if area.is_in_group("player") or area.is_in_group("bullet") or area.is_in_group("xp_orb"):
 		return
 	if area.has_method("take_damage"):
 		area.take_damage(int(damage))

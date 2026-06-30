@@ -12,14 +12,27 @@ const BOSS_ROOM_SCENE: PackedScene = preload("res://scenes/rooms/boss_room.tscn"
 const PLAYER_SPAWN_POS: Vector2 = Vector2(416, 304)
 
 func load_next_room() -> void:
+	call_deferred("_do_load_next_room")
+
+## Callers reach load_next_room() from physics callbacks (door trigger body_entered),
+## so the actual scene-tree mutation must be deferred past the query flush.
+func _do_load_next_room() -> void:
 	if current_room:
 		current_room.queue_free()
+
+	# xp_orb nodes are spawned directly under current_scene (not parented to the
+	# room), so queue_free()-ing current_room above doesn't clean them up.
+	for orb in get_tree().get_nodes_in_group("xp_orb"):
+		orb.queue_free()
 
 	var is_boss := rooms_completed >= 4
 	var next_scene: PackedScene = BOSS_ROOM_SCENE if is_boss else room_scenes[randi() % room_scenes.size()]
 
 	current_room = next_scene.instantiate()
 	get_tree().current_scene.add_child(current_room)
+	# Sibling draw order in 2D is tree order — push the room to index 0 so
+	# Player (and anything else added after it) keeps drawing on top.
+	get_tree().current_scene.move_child(current_room, 0)
 
 	if current_room is RoomBase:
 		var room := current_room as RoomBase

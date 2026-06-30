@@ -22,11 +22,15 @@ var attack_timer: float = 0.0
 var stun_timer: float = 0.0
 var patrol_target: Vector2
 var patrol_timer: float = 0.0
+## Set externally by whoever spawns this enemy (RoomBase.spawn_wave) to the room's
+## floor rect — zero Rect2 (the default) means "unbounded", no clamping applied.
+var patrol_bounds: Rect2 = Rect2()
 
 var _base_move_speed: float = 0.0
 var _slow_timer: float = 0.0
 
 @onready var body_rect: ColorRect = $BodyRect
+@onready var facing_marker: Line2D = $FacingMarker
 @onready var collision_shape: CollisionShape2D = $CollisionShape2D
 @onready var hurtbox: Area2D = $HurtBox
 @onready var hurtbox_shape: CollisionShape2D = $HurtBox/CollisionShape2D
@@ -100,12 +104,53 @@ func _tick_slow(delta: float) -> void:
 func _state_patrol(delta: float) -> void:
 	patrol_timer -= delta
 	var to_target := patrol_target - global_position
-	if to_target.length() < 4.0 or patrol_timer <= 0.0:
-		patrol_target = global_position + Vector2(randf_range(-100.0, 100.0), randf_range(-100.0, 100.0))
-		patrol_timer = randf_range(2.0, 4.0)
+	# get_slide_collision_count() reflects last physics frame's move_and_slide() —
+	# this is what actually catches "walked into a wall", regardless of why the
+	# target was unreachable (random reroll alone could still pick another bad spot).
+	if get_slide_collision_count() > 0:
+		_reverse_patrol_direction()
+		velocity = Vector2.ZERO
+	elif to_target.length() < 4.0 or patrol_timer <= 0.0:
+		_pick_patrol_target()
 		velocity = Vector2.ZERO
 	else:
-		velocity = to_target.normalized() * move_speed * 0.5
+		nav_agent.target_position = patrol_target
+		var next_pos: Vector2 = nav_agent.get_next_path_position()
+		velocity = (next_pos - global_position).normalized() * move_speed * 0.5
+		if velocity != Vector2.ZERO:
+			_face(velocity.angle())
+
+## Keeps BodyRect and FacingMarker rotated together so the white line always
+## points the direction the enemy is actually facing/moving.
+func _face(angle: float) -> void:
+	body_rect.rotation = angle
+	facing_marker.rotation = angle
+
+## A raw random offset can land outside the room (behind a wall) — clamp against the
+## room's floor rect (set by RoomBase.spawn_wave on spawn), inset by half the enemy's
+## own body so it doesn't end up pressed against the wall.
+func _pick_patrol_target() -> void:
+	var raw_target := global_position + Vector2(randf_range(-100.0, 100.0), randf_range(-100.0, 100.0))
+	patrol_target = _clamp_to_patrol_bounds(raw_target)
+	patrol_timer = randf_range(2.0, 4.0)
+
+## Reversing the *intended* heading (patrol_target - global_position) isn't reliable
+## near corners/glancing approaches — it can still point back into the same wall. Use
+## the actual collision normal Godot just computed (perpendicular, away from the
+## surface) instead — that's always correct regardless of approach angle.
+func _reverse_patrol_direction() -> void:
+	var away_dir := get_slide_collision(0).get_normal()
+	patrol_target = _clamp_to_patrol_bounds(global_position + away_dir * 100.0)
+	patrol_timer = randf_range(2.0, 4.0)
+
+func _clamp_to_patrol_bounds(point: Vector2) -> Vector2:
+	if patrol_bounds.size == Vector2.ZERO:
+		return point
+	var margin: float = maxf(body_size.x, body_size.y) * 0.5
+	return Vector2(
+		clampf(point.x, patrol_bounds.position.x + margin, patrol_bounds.end.x - margin),
+		clampf(point.y, patrol_bounds.position.y + margin, patrol_bounds.end.y - margin)
+	)
 
 func _state_chase(delta: float) -> void:
 	if player_ref == null:
@@ -116,7 +161,7 @@ func _state_chase(delta: float) -> void:
 	var next_pos: Vector2 = nav_agent.get_next_path_position()
 	velocity = (next_pos - global_position).normalized() * move_speed
 	if velocity != Vector2.ZERO:
-		body_rect.rotation = velocity.angle()
+		_face(velocity.angle())
 
 	var dist := global_position.distance_to(player_ref.global_position)
 	if dist <= attack_radius:
@@ -131,7 +176,7 @@ func _state_attack(delta: float) -> void:
 		state = EnemyState.PATROL
 		return
 
-	body_rect.rotation = (player_ref.global_position - global_position).angle()
+	_face((player_ref.global_position - global_position).angle())
 
 	attack_timer -= delta
 	if attack_timer <= 0.0:
@@ -201,7 +246,7 @@ func _spawn_xp_orb() -> void:
 	vis.position = Vector2(-5, -5)
 	orb.add_child(vis)
 
-	get_tree().current_scene.add_child(orb)
+	get_tree().current_scene.add_child.call_deferred(orb)
 	orb.body_entered.connect(func(body: Node) -> void:
 		if body.is_in_group("player"):
 			orb.queue_free()
@@ -224,8 +269,10 @@ func _on_player_lost(body: Node2D) -> void:
 ## HurtBox is the only thing bullets damage — the body's CollisionShape2D sits on
 ## collision_layer 4 (not bullets' default mask 1) so body_entered can't also fire
 ## and apply damage a second time for the same hit.
+## Checks "player_bullet" specifically (not the broader "bullet" group, which
+## enemy_bullet.gd also belongs to) so enemies don't hit themselves with their own shots.
 func _on_hurt(area: Area2D) -> void:
-	if not area.is_in_group("bullet"):
+	if not area.is_in_group("player_bullet"):
 		return
 	var dmg: float = area.damage if "damage" in area else 0.0
 	take_damage(dmg)
